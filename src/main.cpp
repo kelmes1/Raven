@@ -20,7 +20,6 @@
 
 using namespace BlenderServoAnimation;
 
-
 #define FPSerial Serial1
 #define SDA_PIN 35
 #define SCL_PIN 36
@@ -36,7 +35,7 @@ const unsigned int delayDuration = 600;
 unsigned int total_frames = 0;
 bool playing = false;
 bool looping = false;
-bool livemode = false;
+// bool livemode = false;
 const char *ap_ssid = "Raven-Access-Point";
 const char *ap_password = "123456789";
 const char *wifi_ssid = "Ziggo4176220-2.4ghz";
@@ -48,7 +47,6 @@ WiFiServer server(80);
 DFPlayerMini_Fast myDFPlayer;
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40, Wire);
-
 
 // #define ROW_NUM 4    // four rows
 // #define COLUMN_NUM 4 // four columns
@@ -102,7 +100,8 @@ Servo animation3Servos[NUM_SERVOS] = {
     Servo(6, Animation3::eye_led_L, move, 50),
 };
 
-void setupAP() {
+void setupAP()
+{
   Serial.print("Setting AP (Access Point)…");
   WiFi.softAP(ap_ssid, ap_password);
   IPAddress IP = WiFi.softAPIP();
@@ -111,31 +110,39 @@ void setupAP() {
   server.begin();
 }
 
-void setupWifi() {
+void setupWifi()
+{
   Serial.println("Connecting to WiFi...");
   WiFi.begin(wifi_ssid, wifi_password);
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(1000);
     Serial.println("Connecting...");
   }
-  Serial.println("Connected to WiFi");  
+  Serial.println("Connected to WiFi");
 }
 
-void setupDFPlayer() {
-  if (!myDFPlayer.begin(FPSerial)) {
+void setupDFPlayer()
+{
+  if (!myDFPlayer.begin(FPSerial))
+  {
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
     Serial.println(F("2.Please insert the SD card!"));
-  } else {
+  }
+  else
+  {
     myDFPlayer.volume(23);
     dfPlayerAvailable = true;
     Serial.println("DFPlayer is available.");
   }
 }
 
-void setupOTA(){
+void setupOTA()
+{
   ArduinoOTA
-    .onStart([]() {
+      .onStart([]()
+               {
       String type;
       if (ArduinoOTA.getCommand() == U_FLASH)
         type = "sketch";
@@ -143,39 +150,36 @@ void setupOTA(){
         type = "filesystem";
 
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
-    })
-    .onEnd([]() {
-      Serial.println("\nEnd");
-    })
-    .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    })
-    .onError([](ota_error_t error) {
+      Serial.println("Start updating " + type); })
+      .onEnd([]()
+             { Serial.println("\nEnd"); })
+      .onProgress([](unsigned int progress, unsigned int total)
+                  { Serial.printf("Progress: %u%%\r", (progress / (total / 100))); })
+      .onError([](ota_error_t error)
+               {
       Serial.printf("Error[%u]: ", error);
       if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
       else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
       else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
       else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
+      else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
 
   ArduinoOTA.begin();
 
   Serial.println("Ready");
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());  
+  Serial.println(WiFi.localIP());
 }
-
 
 /**
  * @brief Initializes the necessary components and configurations for the setup of the program.
- * 
+ *
  * This function sets up the serial communication, initializes the Wire library for I2C communication,
  * sets up the Wi-Fi connection, adds servos to animations, initializes the DFPlayer, and sets the PWM frequency.
  * It also calculates the total number of frames for the selected animation.
  */
-void setup() {
+void setup()
+{
   FPSerial.begin(9600, SERIAL_8N1, RXD, TXD);
   Wire.begin(SDA_PIN, SCL_PIN);
   Serial.println();
@@ -190,12 +194,13 @@ void setup() {
   pwm.setPWMFreq(50);
   total_frames = animations[selectedAnimation].getFrames();
   delay(10);
-
 }
 
-void neutral() {
+void neutral()
+{
   playing = false;
-  if (dfPlayerAvailable) {
+  if (dfPlayerAvailable)
+  {
     myDFPlayer.stop();
   }
   animations[selectedAnimation].play(selectedAnimation + 1);
@@ -203,17 +208,20 @@ void neutral() {
   animations[selectedAnimation].stop();
 }
 
-void pauseFunct() {
+void pauseFunct()
+{
   playing = false;
-  if (dfPlayerAvailable) {
+  if (dfPlayerAvailable)
+  {
     myDFPlayer.pause();
   }
   animations[selectedAnimation].pause();
 }
 
-
-void playFunct() {
-  if (dfPlayerAvailable) {
+void playFunct()
+{
+  if (dfPlayerAvailable)
+  {
     myDFPlayer.play(selectedAnimation + 1);
     delay(500);
   }
@@ -222,90 +230,12 @@ void playFunct() {
   Serial.println("Play trigger");
 }
 
-// void liveControl() {
-//   if (PS4.isConnected()) {
-//     if (PS4.Right())
-//       Serial.println("Right Button");
-//     if (PS4.Down())
-//       Serial.println("Down Button");
-//     if (PS4.Up())
-//       Serial.println("Up Button");
-//     if (PS4.Left())
-//       Serial.println("Left Button");
-
-//     if (PS4.Square())
-//       Serial.println("Square Button");
-//     if (PS4.Cross())
-//       Serial.println("Cross Button");
-//     if (PS4.Circle())
-//       Serial.println("Circle Button");
-//     if (PS4.Triangle())
-//       Serial.println("Triangle Button");
-
-//     if (PS4.UpRight())
-//       Serial.println("Up Right");
-//     if (PS4.DownRight())
-//       Serial.println("Down Right");
-//     if (PS4.UpLeft())
-//       Serial.println("Up Left");
-//     if (PS4.DownLeft())
-//       Serial.println("Down Left");
-
-//     if (PS4.L1())
-//       Serial.println("L1 Button");
-//     if (PS4.R1())
-//       Serial.println("R1 Button");
-
-//     if (PS4.Share())
-//       Serial.println("Share Button");
-//     if (PS4.Options())
-//       Serial.println("Options Button");
-//     if (PS4.L3())
-//       Serial.println("L3 Button");
-//     if (PS4.R3())
-//       Serial.println("R3 Button");
-
-//     if (PS4.PSButton())
-//       Serial.println("PS Button");
-//     if (PS4.Touchpad())
-//       Serial.println("Touch Pad Button");
-
-//     if (PS4.L2()) {
-//       Serial.printf("L2 button at %d\n", PS4.L2Value());
-//     }
-//     if (PS4.R2()) {
-//       Serial.printf("R2 button at %d\n", PS4.R2Value());
-//     }
-
-//     if (PS4.LStickX()) {
-//       Serial.printf("Left Stick x at %d\n", PS4.LStickX());
-//     }
-//     if (PS4.LStickY()) {
-//       Serial.printf("Left Stick y at %d\n", PS4.LStickY());
-//     }
-//     if (PS4.RStickX()) {
-//       Serial.printf("Right Stick x at %d\n", PS4.RStickX());
-//     }
-//     if (PS4.RStickY()) {
-//       Serial.printf("Right Stick y at %d\n", PS4.RStickY());
-//     }
-
-//     if (PS4.Charging())
-//       Serial.println("The controller is charging");
-//     if (PS4.Audio())
-//       Serial.println("The controller has headphones attached");
-//     if (PS4.Mic())
-//       Serial.println("The controller has a mic attached");
-
-//     Serial.printf("Battery Level : %d\n", PS4.Battery());
-//   }
-// }
-
 /**
  * The main loop function that runs repeatedly in the program.
  * It handles key inputs, animation execution, and communication with clients.
  */
-void loop() {
+void loop()
+{
   // char key = keypad.getKey();
   animations[selectedAnimation].run();
   WiFiClient client = server.available();
@@ -313,68 +243,85 @@ void loop() {
   //   liveControl();
   //   return;
   // }
-  if (client) {
+  if (client)
+  {
     char request[25];
     client.readBytesUntil('\r', request, sizeof(request));
-    if (strstr(request, "/") != nullptr) {
+    if (strstr(request, "/") != nullptr)
+    {
       client.println(F(HTML));
     }
-    if (strstr(request, "/livecheckbox=false") != nullptr) {
+    if (strstr(request, "/livecheckbox=false") != nullptr)
+    {
       // PS4.end();
-      livemode = false;
-    } else if (strstr(request, "/livecheckbox=true") != nullptr) {
-      livemode = true;
+      // livemode = false;
+    }
+    else if (strstr(request, "/livecheckbox=true") != nullptr)
+    {
+      // livemode = true;
       client.stop();
       // PS4.begin("1C:66:6D:65:BD:64");
       return;
     }
-    if (strstr(request, "/animation1") != nullptr) {
+    if (strstr(request, "/animation1") != nullptr)
+    {
       Serial.println("Execute Animation 1");
       neutral();
       selectedAnimation = 0;
     }
-    if (strstr(request, "/animation2") != nullptr) {
+    if (strstr(request, "/animation2") != nullptr)
+    {
       Serial.println("Execute Animation 2");
       neutral();
       selectedAnimation = 1;
     }
-    if (strstr(request, "/animation3") != nullptr) {
+    if (strstr(request, "/animation3") != nullptr)
+    {
       Serial.println("Execute Animation 3");
       neutral();
       selectedAnimation = 2;
     }
-    if (strstr(request, "/loopcheckbox=true") != nullptr) {
+    if (strstr(request, "/loopcheckbox=true") != nullptr)
+    {
       looping = true;
-    } else if (strstr(request, "/loopcheckbox=false") != nullptr) {
+    }
+    else if (strstr(request, "/loopcheckbox=false") != nullptr)
+    {
       looping = false;
       playing = false;
     }
 
-    if ((strstr(request, "/play") != nullptr) and animations[selectedAnimation].getMode() != Animation::MODE_PLAY) {
+    if ((strstr(request, "/play") != nullptr) and animations[selectedAnimation].getMode() != Animation::MODE_PLAY)
+    {
       Serial.println("Play animation");
       playFunct();
     }
-    if (strstr(request, "/pause") != nullptr and animations[selectedAnimation].getMode() != Animation::MODE_PAUSE) {
+    if (strstr(request, "/pause") != nullptr and animations[selectedAnimation].getMode() != Animation::MODE_PAUSE)
+    {
       Serial.println("Pause animation");
       pauseFunct();
     }
-    if (strstr(request, "/neutral") != nullptr) {
+    if (strstr(request, "/neutral") != nullptr)
+    {
       Serial.println("Neutral positions");
       neutral();
     }
-    if (strstr(request, "/otamode") != nullptr) {
-      WiFi.softAPdisconnect (true);
+    if (strstr(request, "/otamode") != nullptr)
+    {
+      WiFi.softAPdisconnect(true);
       setupWifi();
       setupOTA();
-      while(true){
-       ArduinoOTA.handle(); // Handle OTA updates  
+      while (true)
+      {
+        ArduinoOTA.handle(); // Handle OTA updates
       }
       // delay(120000);
       // ESP.restart();
-    }    
+    }
     client.stop();
   }
-  if (looping and playing and animations[selectedAnimation].getMode() == Animation::MODE_DEFAULT) {
+  if (looping and playing and animations[selectedAnimation].getMode() == Animation::MODE_DEFAULT)
+  {
     playFunct();
   }
 }

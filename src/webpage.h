@@ -100,8 +100,8 @@ const char HTML[] PROGMEM = R"=====(
       <div>
         <label for="loopButton">Loop Animation</label>
         <button id="loopButton" class="button checkboxes" onclick="toggleLoop()">Off</button>
-        <label id="livelabel" for="liveButton">Live Control Mode</label>
-        <button id="liveButton" class="button" onclick="toggleLive()">Off</button>  
+        // <label id="livelabel" for="liveButton">Live Control Mode</label>
+        // <button id="liveButton" class="button" onclick="toggleLive()">Off</button>  
         <div class="buttons">
           <button class="button" onclick="otaUpdate()">Update OTA</button>
         </div>                
@@ -111,7 +111,7 @@ const char HTML[] PROGMEM = R"=====(
 
   <script>
     var loopState = false;
-    var liveState = false;
+    // var liveState = false;
 
     function playAnimation() {
       var xhr = new XMLHttpRequest();
@@ -148,25 +148,25 @@ const char HTML[] PROGMEM = R"=====(
       xhr.send();
     }
 
-    function toggleLive() {
-      liveState = !liveState;
-      var liveButton = document.getElementById("liveButton");
-      liveButton.textContent = liveState ? "On" : "Off";
+    // function toggleLive() {
+    //   liveState = !liveState;
+    //   var liveButton = document.getElementById("liveButton");
+    //   liveButton.textContent = liveState ? "On" : "Off";
 
-      // Disable all controls except for live control mode button
-      var otherControls = document.querySelectorAll('.container button:not(#liveButton), .container select, .container label:not(#livelabel)');
-      otherControls.forEach(function(control) {
-        if (liveState) {
-          control.classList.add('disabled');
-        } else {
-          control.classList.remove('disabled');
-        }
-      });
+    //   // Disable all controls except for live control mode button
+    //   var otherControls = document.querySelectorAll('.container button:not(#liveButton), .container select, .container label:not(#livelabel)');
+    //   otherControls.forEach(function(control) {
+    //     if (liveState) {
+    //       control.classList.add('disabled');
+    //     } else {
+    //       control.classList.remove('disabled');
+    //     }
+    //   });
 
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/livecheckbox=" + liveState, true);
-      xhr.send();
-    }
+    //   var xhr = new XMLHttpRequest();
+    //   xhr.open("GET", "/livecheckbox=" + liveState, true);
+    //   xhr.send();
+    // }
 
     function otaUpdate() {
       var xhr = new XMLHttpRequest();
