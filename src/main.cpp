@@ -38,8 +38,7 @@ bool looping = false;
 // bool livemode = false;
 const char *ap_ssid = "Raven-Access-Point";
 const char *ap_password = "123456789";
-const char *wifi_ssid = "Ziggo4176220-2.4ghz";
-const char *wifi_password = "zshcyiu6Srjy5cHk";
+
 const int NUM_SERVOS = 7;
 
 WiFiServer server(80);
